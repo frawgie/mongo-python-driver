@@ -664,6 +664,7 @@ class _TestPooling(_TestPoolingBase):
         # Pool reclaimed the socket
         self.assertEqual(1, len(cx_pool.sockets))
         self.assertEqual(the_sock[0], id(one(cx_pool.sockets).sock))
+        self.assertEqual(0, len(cx_pool._tid_to_sock))
 
 
 class _TestMaxPoolSize(_TestPoolingBase):
