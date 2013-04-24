@@ -732,8 +732,16 @@ class _TestMaxPoolSize(_TestPoolingBase):
             if start_request:
                 # Trigger final cleanup in Python <= 2.6
                 cx_pool._ident.get()
+
+                expected_idle = min(max_pool_size, nthreads)
+                message = (
+                    '%d idle sockets (expected %d) and %d request sockets'
+                    ' (expected 0)' % (
+                        len(cx_pool.sockets), expected_idle,
+                        len(cx_pool._tid_to_sock)))
+
                 self.assertEqual(
-                    min(max_pool_size, nthreads), len(cx_pool.sockets))
+                    expected_idle, len(cx_pool.sockets), message)
             else:
                 # Without calling start_request(), threads can safely share
                 # sockets; the number running concurrently, and hence the number
@@ -763,7 +771,7 @@ class _TestMaxPoolSize(_TestPoolingBase):
     def test_max_pool_size_with_leaked_request_massive(self):
         nthreads = 1000
         self._test_max_pool_size(
-            1, 0, max_pool_size=2 * nthreads, nthreads=nthreads)
+            2, 1, max_pool_size=2 * nthreads, nthreads=nthreads)
 
     def test_max_pool_size_with_end_request_only(self):
         # Call end_request() but not start_request()
